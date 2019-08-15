@@ -38,6 +38,7 @@ public class RegisterActivity extends AppCompatActivity {
     private EditText regPass;
     private Button btnConfirm;
     private FirebaseAuth firebaseAuth;
+    private  String displayUserName;
     private static final int CHOOSE_IMAGE=101;
     Uri uriProfileImage;
     ProgressDialog progressDialog;
@@ -46,7 +47,7 @@ public class RegisterActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_user);
+        setContentView(R.layout.activity_reg);
         idAssign();
         firebaseAuth =FirebaseAuth.getInstance();
         progressDialog = new ProgressDialog(this);
@@ -89,7 +90,7 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     private void saveUserInformation() {
-        String displayUserName = regName.getText().toString();
+        displayUserName = regName.getText().toString();
         FirebaseUser user = firebaseAuth.getCurrentUser();
 
         UserProfileChangeRequest profile = new UserProfileChangeRequest.Builder().setDisplayName(displayUserName).setPhotoUri(Uri.parse(profileImageUrl)).build();
@@ -122,7 +123,7 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     private void uploadImageToFirebase() {
-        final StorageReference profileImageRef = FirebaseStorage.getInstance().getReference("profilepics/"+System.currentTimeMillis()+".jpg");
+        final StorageReference profileImageRef = FirebaseStorage.getInstance().getReference("profilepics/"+displayUserName+".jpg");
 
         if(uriProfileImage!=null){
             progressDialog.show();
