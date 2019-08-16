@@ -78,6 +78,7 @@ public class RegisterActivity extends AppCompatActivity {
                     });
                 }
 
+
             }
         });
         avatarPic.setOnClickListener(new View.OnClickListener() {
@@ -122,8 +123,9 @@ public class RegisterActivity extends AppCompatActivity {
         }
     }
 
+
     private void uploadImageToFirebase() {
-        final StorageReference profileImageRef = FirebaseStorage.getInstance().getReference("profilepics/"+displayUserName+".jpg");
+        final StorageReference profileImageRef = FirebaseStorage.getInstance().getReference("profilepics/"+System.currentTimeMillis()+".jpg");
 
         if(uriProfileImage!=null){
             progressDialog.show();
