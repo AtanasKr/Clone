@@ -28,14 +28,15 @@ import android.view.Menu;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.Console;
 
 public class UserActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
-    private TextView showName;
-    private TextView showEmail;
-    private ImageView dispalyPicture;
+        private TextView showName;
+        private TextView showEmail;
+        private ImageView displayPicture;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,33 +57,22 @@ public class UserActivity extends AppCompatActivity
         FirebaseUser user = firebaseAuth.getCurrentUser();
         showName = headerView.findViewById(R.id.showName);
         showEmail = headerView.findViewById(R.id.showEmail);
-        dispalyPicture=headerView.findViewById(R.id.displayImg);
-        RegisterActivity name = new RegisterActivity();
-        StorageReference storageReference = FirebaseStorage.getInstance().getReference().child("profilepics/1565959557860.jpg");
-        storageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-            @Override
-            public void onSuccess(Uri uri) {
-                String imageURL = uri.toString();
-                Glide.with(getApplicationContext()).load(imageURL).into(dispalyPicture);
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception exception) {
-                // Handle any errors
-            }
-        });
+        displayPicture=headerView.findViewById(R.id.displayImg);
 
-
-        String userName;
-        String userEmail;
 
         if(user!=null) {
+            String userName;
+            String userEmail;
             userName = user.getDisplayName();
             userEmail = user.getEmail();
             showName.setText(userName);
             showEmail.setText(userEmail);
+            Toast.makeText(this,"",Toast.LENGTH_SHORT).show();
 
         }
+
+
+
 
     }
 

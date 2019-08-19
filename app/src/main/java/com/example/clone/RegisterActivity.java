@@ -11,9 +11,11 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -24,11 +26,16 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class RegisterActivity extends AppCompatActivity {
 
@@ -38,8 +45,10 @@ public class RegisterActivity extends AppCompatActivity {
     private EditText regPass;
     private Button btnConfirm;
     private FirebaseAuth firebaseAuth;
-    private  String displayUserName;
+    private String displayUserName;
+    private DatabaseReference mDatabaseRef;
     private static final int CHOOSE_IMAGE=101;
+
     Uri uriProfileImage;
     ProgressDialog progressDialog;
     String profileImageUrl;
@@ -52,6 +61,9 @@ public class RegisterActivity extends AppCompatActivity {
         firebaseAuth =FirebaseAuth.getInstance();
         progressDialog = new ProgressDialog(this);
         progressDialog.setMessage("Loading");
+        mDatabaseRef = FirebaseDatabase.getInstance().getReference("uploads");
+        //Upload Email and Password to firebase;
+
         btnConfirm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -61,17 +73,19 @@ public class RegisterActivity extends AppCompatActivity {
                     String reg_Email = regEmail.getText().toString().trim();
                     String reg_Password = regPass.getText().toString().trim();
 
+
+
                     firebaseAuth.createUserWithEmailAndPassword(reg_Email,reg_Password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             if(task.isSuccessful()){
-                                Toast.makeText(RegisterActivity.this,"Registration successful",Toast.LENGTH_SHORT);
+                                Toast.makeText(RegisterActivity.this,"Registration successful",Toast.LENGTH_SHORT).show();
                                 saveUserInformation();
                                 Intent intent = new Intent(RegisterActivity.this,UserActivity.class);
                                 startActivity(intent);
                             }
                             else {
-                                Toast.makeText(RegisterActivity.this,"Registration failed",Toast.LENGTH_SHORT);
+                                Toast.makeText(RegisterActivity.this,"Registration failed",Toast.LENGTH_SHORT).show();
                             }
 
                         }
@@ -93,16 +107,18 @@ public class RegisterActivity extends AppCompatActivity {
     private void saveUserInformation() {
         displayUserName = regName.getText().toString();
         FirebaseUser user = firebaseAuth.getCurrentUser();
-
         UserProfileChangeRequest profile = new UserProfileChangeRequest.Builder().setDisplayName(displayUserName).setPhotoUri(Uri.parse(profileImageUrl)).build();
+
 
         user.updateProfile(profile).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
-                Toast.makeText(RegisterActivity.this,"User Information saved",Toast.LENGTH_SHORT);
+                Toast.makeText(RegisterActivity.this,"User Information saved",Toast.LENGTH_SHORT).show();
             }
         });
     }
+
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
@@ -116,6 +132,7 @@ public class RegisterActivity extends AppCompatActivity {
                 avatarPic.setImageBitmap(bitmap);
                 //Upload Image to firebase
                 uploadImageToFirebase();
+
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -127,6 +144,7 @@ public class RegisterActivity extends AppCompatActivity {
     private void uploadImageToFirebase() {
         final StorageReference profileImageRef = FirebaseStorage.getInstance().getReference("profilepics/"+System.currentTimeMillis()+".jpg");
 
+
         if(uriProfileImage!=null){
             progressDialog.show();
             profileImageRef.putFile(uriProfileImage).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
@@ -134,13 +152,18 @@ public class RegisterActivity extends AppCompatActivity {
                 public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                     progressDialog.dismiss();
                     profileImageUrl = taskSnapshot.getDownloadUrl().toString();
+                    Uploads upload = new Uploads(regName.getText().toString().trim(), taskSnapshot.getDownloadUrl().toString());
+                    String uploadId = mDatabaseRef.push().getKey();
+                    mDatabaseRef.child(uploadId).setValue(upload);
+
+
 
                 }
             }).addOnFailureListener(new OnFailureListener() {
                 @Override
                 public void onFailure(@NonNull Exception e) {
                     progressDialog.dismiss();
-                    Toast.makeText(RegisterActivity.this,"Error uploading the picture",Toast.LENGTH_SHORT);
+                    Toast.makeText(RegisterActivity.this,"Error uploading the picture",Toast.LENGTH_SHORT).show();
                 }
             });
         }
@@ -154,6 +177,7 @@ public class RegisterActivity extends AppCompatActivity {
         btnConfirm = findViewById(R.id.btnConfirm);
     }
 
+
     private boolean validate() {
         Boolean result = false;
 
@@ -161,10 +185,11 @@ public class RegisterActivity extends AppCompatActivity {
         String password = regPass.getText().toString();
         String email = regEmail.getText().toString();
         if (name.isEmpty() || password.isEmpty() || email.isEmpty()) {
-            Toast.makeText(this, "Please fill all the details", Toast.LENGTH_SHORT);
+            Toast.makeText(this, "Please fill all the details", Toast.LENGTH_SHORT).show();
         }
         else{
             result = true;
+
         }
         return result;
     }
