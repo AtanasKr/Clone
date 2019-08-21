@@ -46,6 +46,7 @@ public class RegisterActivity extends AppCompatActivity {
     private Button btnConfirm;
     private FirebaseAuth firebaseAuth;
     private String displayUserName;
+    private String passEmail;
     private DatabaseReference mDatabaseRef;
     private static final int CHOOSE_IMAGE=101;
 
@@ -119,7 +120,6 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
 
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
 
@@ -141,8 +141,17 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
 
+    public Uri getUriProfileImage() {
+        return uriProfileImage;
+    }
+
+    public void setUriProfileImage(Uri uriProfileImage) {
+        this.uriProfileImage = uriProfileImage;
+    }
+
     private void uploadImageToFirebase() {
-        final StorageReference profileImageRef = FirebaseStorage.getInstance().getReference("profilepics/"+System.currentTimeMillis()+".jpg");
+        passEmail=regEmail.getText().toString();
+        StorageReference profileImageRef = FirebaseStorage.getInstance().getReference("profilepics/"+passEmail+".jpg");
 
 
         if(uriProfileImage!=null){

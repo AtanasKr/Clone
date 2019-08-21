@@ -1,6 +1,7 @@
 package com.example.clone;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -8,16 +9,23 @@ import androidx.annotation.NonNull;
 import androidx.core.view.GravityCompat;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 
+import android.provider.MediaStore;
 import android.view.MenuItem;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
+import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
+import com.squareup.picasso.Picasso;
 
 import androidx.drawerlayout.widget.DrawerLayout;
 
@@ -31,13 +39,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.Console;
+import java.io.IOException;
+import java.net.URI;
 
 public class UserActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
         private TextView showName;
         private TextView showEmail;
         private ImageView displayPicture;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -67,8 +76,21 @@ public class UserActivity extends AppCompatActivity
             userEmail = user.getEmail();
             showName.setText(userName);
             showEmail.setText(userEmail);
-            Toast.makeText(this,"",Toast.LENGTH_SHORT).show();
-
+            StorageReference myImageRef = FirebaseStorage.getInstance().getReference("profilepics/"+showEmail+".jpg");
+            //String name = myImageRef.getDownloadUrl().toString();
+            //Glide.with(this).load(myImageRef).into(displayPicture);
+            myImageRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                @Override
+                public void onSuccess(Uri uri) {
+                    String holder = uri.toString();
+                    Glide.with(getApplicationContext()).load(holder).into(displayPicture);
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception exception) {
+                    Toast.makeText(UserActivity.this,"Error loading the picture",Toast.LENGTH_SHORT).show();
+                }
+            });
         }
 
 
