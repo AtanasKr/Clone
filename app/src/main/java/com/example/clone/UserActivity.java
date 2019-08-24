@@ -79,12 +79,11 @@ public class UserActivity extends AppCompatActivity
             StorageReference myImageRef = FirebaseStorage.getInstance().getReference("profilepics/"+showEmail+".jpg");
             //String name = myImageRef.getDownloadUrl().toString();
             //Glide.with(this).load(myImageRef).into(displayPicture);
-
             myImageRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                 @Override
                 public void onSuccess(Uri uri) {
                     String holder = uri.toString();
-
+                    Glide.with(getApplicationContext()).load(holder).into(displayPicture);
                 }
             }).addOnFailureListener(new OnFailureListener() {
                 @Override
@@ -92,7 +91,6 @@ public class UserActivity extends AppCompatActivity
                     Toast.makeText(UserActivity.this,"Error loading the picture",Toast.LENGTH_SHORT).show();
                 }
             });
-            Glide.with(getApplicationContext()).load("https://firebasestorage.googleapis.com/v0/b/clone-43b13.appspot.com/o/profilepics%2FAtanas_sd%40abv.bg.jpg?alt=media&token=36004c09-f32d-4b8d-ba98-4a17e5b78a54").apply(new RequestOptions().override(300, 200)).into(displayPicture);
         }
 
 
